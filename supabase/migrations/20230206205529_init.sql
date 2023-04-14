@@ -152,16 +152,19 @@ select
   d.category_id,
   d.duration,
   d.start,
+  d.start::time as start_time,
   a.username,
   a.location,
-  c.likecount
+  coalesce(c.likecount, 0) as likes
 from
   deals d
   join accounts a on d.dealer_id = a.id
   left join like_counts_view c on c.deal_id = d.id
 where
   d.template = false
-  and now() between d."start" and d."start"  + (d."duration" || ' hours')::interval;
+  and now() between d."start" and d."start"  + (d."duration" || ' hours')::interval
+order by
+  start_time;
 
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
