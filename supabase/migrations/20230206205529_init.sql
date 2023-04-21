@@ -168,6 +168,56 @@ order by
 
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
+  future_deals_view as
+select
+  d.id,
+  d.dealer_id,
+  d.title,
+  d.description,
+  d.category_id,
+  d.duration,
+  d.start,
+  d.start::time as start_time,
+  a.username,
+  a.location,
+  coalesce(c.likecount, 0) as likes
+from
+  deals d
+  join accounts a on d.dealer_id = a.id
+  left join like_counts_view c on c.deal_id = d.id
+where
+  d.template = false
+  and d."start" > now()
+order by
+  start_time;
+
+-----------------------------------------------------------------------------------------------------------------------
+create or replace view
+  past_deals_view as
+select
+  d.id,
+  d.dealer_id,
+  d.title,
+  d.description,
+  d.category_id,
+  d.duration,
+  d.start,
+  d.start::time as start_time,
+  a.username,
+  a.location,
+  coalesce(c.likecount, 0) as likes
+from
+  deals d
+  join accounts a on d.dealer_id = a.id
+  left join like_counts_view c on c.deal_id = d.id
+where
+  d.template = false
+  and (d."start" + (d."duration" || ' hours')::interval) < now()
+order by
+  start_time;
+
+-----------------------------------------------------------------------------------------------------------------------
+create or replace view
   dealer_ratings_view as
 select
   r.user_id,
@@ -292,14 +342,3 @@ begin
   return query select * from active_deals_view d where st_within(d.location, v_extent);
 end;
 $$ language plpgsql;
-
------------------------------------------------------------------------------------------------------------------------
-create trigger on_auth_user_created
-after insert on auth.users for each row
-execute procedure handle_new_user ();
-
-alter table accounts enable row level security;
-
-create policy "Select only for own account" on accounts as PERMISSIVE for
-select
-  to public using (auth.uid () = id)
