@@ -176,61 +176,61 @@ values
     null
   );
 
--- insert into
---   public.deals (id, dealer_id, title, description, category_id, duration, "start", "template", created)
--- values
---   (
---     '53031fbd-c22a-42c8-b810-cd7ca5fbd4a7',
---     '8813dbdb-6680-4c76-a220-d04b09059f77',
---     'Super Duper Deal',
---     'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.',
---     1,
---     7560,
---     '2023-02-19 15:34:00+01',
---     false,
---     '2023-02-19 13:35:38.048038+01'
---   ),
---   (
---     '8c75d64f-7aeb-4cab-b34b-c268e8993a8a',
---     '8813dbdb-6680-4c76-a220-d04b09059f77',
---     'Deal mit Template',
---     'asdfasdfasdafadf',
---     1,
---     7464,
---     '2023-02-23 02:01:00+01',
---     false,
---     '2023-02-23 02:01:52.146275+01'
---   ),
---   (
---     '2a064c2b-298e-40a3-a42e-019f4653bb43',
---     '8813dbdb-6680-4c76-a220-d04b09059f77',
---     'Deal mit Template',
---     'asdfasdfasdafadf',
---     1,
---     7464,
---     '2023-02-23 02:01:00+01',
---     true,
---     '2023-02-23 02:01:52.163983+01'
---   ),
---   (
---     '81d74c14-1530-4840-a7bd-8ec9cff57010',
---     'a3f9b7ff-3a99-4e5c-8f54-995b85d3ad95',
---     'Betrink dich umsonst!',
---     'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.',
---     10,
---     7464,
---     '2023-02-23 17:01:00+01',
---     false,
---     '2023-02-23 17:02:32.619254+01'
---   ),
---   (
---     'cd84afca-0c2e-43c4-ac14-2fa7e1ccf430',
---     'a3f9b7ff-3a99-4e5c-8f54-995b85d3ad95',
---     'Betrink dich umsonst!',
---     'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.',
---     10,
---     7464,
---     '2023-02-23 17:01:00+01',
---     true,
---     '2023-02-23 17:02:32.639149+01'
---   );
+insert into
+  public.deals (id, dealer_id, title, description, category_id, duration, "start", "template", created)
+values
+  (
+    '53031fbd-c22a-42c8-b810-cd7ca5fbd4a7',
+    '8813dbdb-6680-4c76-a220-d04b09059f77',
+    'Super Duper Deal',
+    'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.',
+    1,
+    7560,
+    '2023-02-19 15:34:00+01',
+    false,
+    '2023-02-19 13:35:38.048038+01'
+  ),
+  (
+    '8c75d64f-7aeb-4cab-b34b-c268e8993a8a',
+    '8813dbdb-6680-4c76-a220-d04b09059f77',
+    'Deal mit Template',
+    'asdfasdfasdafadf',
+    1,
+    7464,
+    '2023-02-23 02:01:00+01',
+    false,
+    '2023-02-23 02:01:52.146275+01'
+  ),
+  (
+    '2a064c2b-298e-40a3-a42e-019f4653bb43',
+    '8813dbdb-6680-4c76-a220-d04b09059f77',
+    'Deal mit Template',
+    'asdfasdfasdafadf',
+    1,
+    7464,
+    '2023-02-23 02:01:00+01',
+    true,
+    '2023-02-23 02:01:52.163983+01'
+  ),
+  (
+    '81d74c14-1530-4840-a7bd-8ec9cff57010',
+    'a3f9b7ff-3a99-4e5c-8f54-995b85d3ad95',
+    'Betrink dich umsonst!',
+    'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.',
+    10,
+    7464,
+    '2023-02-23 17:01:00+01',
+    false,
+    '2023-02-23 17:02:32.619254+01'
+  ),
+  (
+    'cd84afca-0c2e-43c4-ac14-2fa7e1ccf430',
+    'a3f9b7ff-3a99-4e5c-8f54-995b85d3ad95',
+    'Betrink dich umsonst!',
+    'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.',
+    10,
+    7464,
+    '2023-02-23 17:01:00+01',
+    true,
+    '2023-02-23 17:02:32.639149+01'
+  );

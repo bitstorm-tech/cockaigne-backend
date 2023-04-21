@@ -342,3 +342,8 @@ begin
   return query select * from active_deals_view d where st_within(d.location, v_extent);
 end;
 $$ language plpgsql;
+
+-----------------------------------------------------------------------------------------------------------------------
+create trigger on_auth_user_created
+after insert on auth.users for each row
+execute procedure handle_new_user ();
