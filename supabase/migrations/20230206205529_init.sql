@@ -29,7 +29,7 @@ create table if not exists
   accounts (
     id uuid not null default uuid_generate_v4 () primary key,
     email text not null,
-    dealer boolean not null default false,
+    is_dealer boolean not null default false,
     street text null,
     username text not null,
     age integer null,
@@ -139,7 +139,7 @@ select
 from
   accounts
 where
-  dealer is true;
+  is_dealer is true;
 
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
@@ -249,7 +249,7 @@ begin
       id,
       username,
       email,
-      dealer,
+      is_dealer,
       default_category,
       street,
       house_number,
