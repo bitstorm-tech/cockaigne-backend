@@ -40,8 +40,8 @@ create table if not exists
     zip integer null,
     phone text null,
     tax_id text null,
-    use_current_location boolean null default false,
-    search_radius integer null default 500,
+    use_current_location boolean not null default false,
+    search_radius integer not null default 500,
     "location" geometry (point, 4326) null
   );
 
@@ -284,21 +284,6 @@ return new;
 end;
 
 $$ language plpgsql;
-
------------------------------------------------------------------------------------------------------------------------
-create
-or replace function get_favorite_dealers () returns setof record as $$
-select
-  a.id,
-  a.username
-from
-  accounts a,
-  favorite_dealers f
-where
-  a.id = f.dealer_id
-  and f.user_id = auth.uid();
-
-$$ language sql;
 
 -----------------------------------------------------------------------------------------------------------------------
 create
