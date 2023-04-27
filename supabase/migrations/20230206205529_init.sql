@@ -287,23 +287,6 @@ $$ language plpgsql;
 
 -----------------------------------------------------------------------------------------------------------------------
 create
-or replace function get_favorite_dealer_deals () returns setof record as $$
-select
-  d. *,
-  a.username
-from
-  deals d
-  join favorite_dealers f on d.dealer_id = f.dealer_id
-  join accounts a on a .id = d.dealer_id
-where
-  now() between d. "start"
-  and d. "start" + (d. "duration" || ' hours') :: interval
-  and f.user_id = auth.uid();
-
-$$ language sql;
-
------------------------------------------------------------------------------------------------------------------------
-create
 or replace function get_active_deals_within_extent (p_location float[] default null, p_radius int default null, p_extent float[] default null) returns setof active_deals_view as $$
 declare
   v_point_min geometry(point, 4326);
