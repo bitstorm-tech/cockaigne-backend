@@ -130,14 +130,23 @@ order by
 create or replace view
   dealer_view as
 select
-  id,
-  username,
-  street,
-  house_number,
-  zip,
-  city
+  a.id,
+  a.username,
+  a.street,
+  a.house_number,
+  a.phone,
+  a.zip,
+  a.city,
+  (
+    select
+      c.name
+    from
+      categories c
+    where
+      c.id = a.default_category
+  ) as category
 from
-  accounts
+  accounts a
 where
   is_dealer is true;
 
@@ -224,6 +233,7 @@ select
   r.dealer_id,
   r.stars,
   r.rating_text,
+  r.created,
   a.username
 from
   dealer_ratings r
@@ -239,6 +249,33 @@ select
 from
   favorite_dealers f
   join accounts a on f.dealer_id = a.id;
+
+-----------------------------------------------------------------------------------------------------------------------
+create or replace view
+  invoice_metadata_view as
+select
+  d.dealer_id,
+  extract(
+    year
+    from
+      d.start
+  ) as year,
+  extract(
+    month
+    from
+      d.start
+  ) as month,
+  count(d.id) as deals,
+  sum(d.duration) as total_duration_in_min
+from
+  accounts a
+  join deals d on d.dealer_id = a.id
+where
+  d.template = false
+group by
+  d.dealer_id,
+  year,
+  month;
 
 -----------------------------------------------------------------------------------------------------------------------
 create
@@ -287,6 +324,20 @@ $$ language plpgsql;
 
 -----------------------------------------------------------------------------------------------------------------------
 create
+or replace function handle_update_email () returns trigger security definer as $$ 
+begin
+  update public.accounts
+  set email = new.email
+  where id = new.id;
+
+return new;
+
+end;
+
+$$ language plpgsql;
+
+-----------------------------------------------------------------------------------------------------------------------
+create
 or replace function get_active_deals_within_extent (p_location float[] default null, p_radius int default null, p_extent float[] default null) returns setof active_deals_view as $$
 declare
   v_point_min geometry(point, 4326);
@@ -315,3 +366,9 @@ $$ language plpgsql;
 create trigger on_auth_user_created
 after insert on auth.users for each row
 execute procedure handle_new_user ();
+
+-----------------------------------------------------------------------------------------------------------------------
+create trigger on_user_email_changed
+after
+update on auth.users for each row
+execute procedure handle_update_email ();
