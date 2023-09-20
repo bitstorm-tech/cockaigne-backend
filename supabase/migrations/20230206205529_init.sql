@@ -113,6 +113,14 @@ create table
     constraint "selected_categories_pk" unique (user_id, category_id)
   );
 
+create table
+  activated_vouchers (
+    user_id uuid not null references accounts (id) on delete restrict on update cascade,
+    voucher_code text not null references vouchers (code) on delete restrict on update cascade,
+    activated timestamptz not null default now(),
+    constraint "activated_vouchers_pk" unique (user_id, voucher_code)
+  );
+
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
   like_counts_view as
@@ -276,6 +284,22 @@ group by
   d.dealer_id,
   year,
   month;
+
+-----------------------------------------------------------------------------------------------------------------------
+create or replace view
+    active_vouchers_view as
+select
+    av.user_id,
+    av.activated,
+    v.code,
+    v.start,
+    v."end",
+    v.duration_in_days
+from
+    vouchers v
+        join activated_vouchers av on v.code = av.voucher_code
+where
+        v.is_active and (now() between v."start" and v."end") or (now() between v."start" and v."start" + (v.duration_in_days || ' days')::interval);
 
 -----------------------------------------------------------------------------------------------------------------------
 create
