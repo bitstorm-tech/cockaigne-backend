@@ -121,6 +121,25 @@ create table
     constraint "activated_vouchers_pk" unique (user_id, voucher_code)
   );
 
+create table
+  plans (
+    id serial primary key,
+    stripe_product_id text not null,
+    free_days_per_month integer not null,
+    active boolean not null default false,
+    created timestamp not null default now()
+  );
+
+create table
+  subscriptions (
+    user_id uuid not null references accounts (id) on delete restrict on update cascade,
+    plan_id integer not null references plans (id) on delete restrict on update cascade,
+    stripe_subscription_id text not null,
+    active boolean not null default false,
+    created timestamptz not null default now(),
+    constraint "subscriptions_pk" unique (user_id, stripe_subscription_id)
+  );
+
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
   like_counts_view as
@@ -133,6 +152,19 @@ group by
   deal_id
 order by
   likecount desc;
+
+-----------------------------------------------------------------------------------------------------------------------
+create or replace view
+  hot_deal_counts_view as
+select
+  deal_id,
+  count(deal_id) as hotcount
+from
+  hot_deals
+group by
+  deal_id
+order by
+  hotcount desc;
 
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
@@ -172,11 +204,13 @@ select
   d.start::time as start_time,
   a.username,
   a.location,
-  coalesce(c.likecount, 0) as likes
+  coalesce(c.likecount, 0) as likes,
+  coalesce(h.hotcount, 0) as hots
 from
   deals d
   join accounts a on d.dealer_id = a.id
   left join like_counts_view c on c.deal_id = d.id
+  left join hot_deal_counts_view h on h.deal_id = d.id
 where
   d.template = false
   and now() between d."start" and d."start"  + (d."duration" || ' hours')::interval
@@ -197,11 +231,13 @@ select
   d.start::time as start_time,
   a.username,
   a.location,
-  coalesce(c.likecount, 0) as likes
+  coalesce(c.likecount, 0) as likes,
+  coalesce(h.hotcount, 0) as hots
 from
   deals d
   join accounts a on d.dealer_id = a.id
   left join like_counts_view c on c.deal_id = d.id
+  left join hot_deal_counts_view h on h.deal_id = d.id
 where
   d.template = false
   and d."start" > now()
@@ -222,11 +258,13 @@ select
   d.start::time as start_time,
   a.username,
   a.location,
-  coalesce(c.likecount, 0) as likes
+  coalesce(c.likecount, 0) as likes,
+  coalesce(h.hotcount, 0) as hots
 from
   deals d
   join accounts a on d.dealer_id = a.id
   left join like_counts_view c on c.deal_id = d.id
+  left join hot_deal_counts_view h on h.deal_id = d.id
 where
   d.template = false
   and (d."start" + (d."duration" || ' hours')::interval) < now()
@@ -287,60 +325,56 @@ group by
 
 -----------------------------------------------------------------------------------------------------------------------
 create or replace view
-    active_vouchers_view as
+  active_vouchers_view as
 select
-    av.user_id,
-    av.activated,
-    v.code,
-    v.start,
-    v."end",
-    v.duration_in_days
+  av.user_id,
+  av.activated,
+  v.code,
+  v.start,
+  v."end",
+  v.duration_in_days
 from
-    vouchers v
-        join activated_vouchers av on v.code = av.voucher_code
+  vouchers v
+  join activated_vouchers av on v.code = av.voucher_code
 where
-        v.is_active and (now() between v."start" and v."end") or (now() between v."start" and v."start" + (v.duration_in_days || ' days')::interval);
+  v.is_active
+  and (now() between v."start" and v."end")
+  or (now() between v."start" and v."start"  + (v.duration_in_days || ' days')::interval);
 
 -----------------------------------------------------------------------------------------------------------------------
 create
-or replace function handle_new_user () returns trigger security definer as $$ 
+or replace function handle_new_user () returns trigger security definer as $$
 begin
-  insert into
-    public.accounts (
-      id,
-      username,
-      email,
-      is_dealer,
-      default_category,
-      street,
-      house_number,
-      city,
-      zip,
-      phone,
-      age,
-      gender,
-      tax_id,
-      "location"
-    )
-  values
-    (
-      new.id,
-      new.raw_user_meta_data ->> 'username',
-      new.raw_user_meta_data ->> 'email',
-      (new.raw_user_meta_data ->> 'isDealer') :: boolean,
-      (new.raw_user_meta_data ->> 'defaultCategory') :: integer,
-      new.raw_user_meta_data ->> 'street',
-      new.raw_user_meta_data ->> 'houseNumber',
-      new.raw_user_meta_data ->> 'city',
-      (new.raw_user_meta_data ->> 'zip') :: integer,
-      new.raw_user_meta_data ->> 'phone',
-      (new.raw_user_meta_data ->> 'age') :: integer,
-      new.raw_user_meta_data ->> 'gender',
-      new.raw_user_meta_data ->> 'taxId',
-      extensions.st_geomfromtext(new.raw_user_meta_data ->> 'location')
-    );
+    insert into public.accounts (id,
+                                 username,
+                                 email,
+                                 is_dealer,
+                                 default_category,
+                                 street,
+                                 house_number,
+                                 city,
+                                 zip,
+                                 phone,
+                                 age,
+                                 gender,
+                                 tax_id,
+                                 "location")
+    values (new.id,
+            new.raw_user_meta_data ->> 'username',
+            new.raw_user_meta_data ->> 'email',
+            (new.raw_user_meta_data ->> 'isDealer') :: boolean,
+            (new.raw_user_meta_data ->> 'defaultCategory') :: integer,
+            new.raw_user_meta_data ->> 'street',
+            new.raw_user_meta_data ->> 'houseNumber',
+            new.raw_user_meta_data ->> 'city',
+            (new.raw_user_meta_data ->> 'zip') :: integer,
+            new.raw_user_meta_data ->> 'phone',
+            (new.raw_user_meta_data ->> 'age') :: integer,
+            new.raw_user_meta_data ->> 'gender',
+            new.raw_user_meta_data ->> 'taxId',
+            extensions.st_geomfromtext(new.raw_user_meta_data ->> 'location'));
 
-return new;
+    return new;
 
 end;
 
@@ -348,13 +382,13 @@ $$ language plpgsql;
 
 -----------------------------------------------------------------------------------------------------------------------
 create
-or replace function handle_update_email () returns trigger security definer as $$ 
+or replace function handle_update_email () returns trigger security definer as $$
 begin
-  update public.accounts
-  set email = new.email
-  where id = new.id;
+    update public.accounts
+    set email = new.email
+    where id = new.id;
 
-return new;
+    return new;
 
 end;
 
@@ -364,25 +398,25 @@ $$ language plpgsql;
 create
 or replace function get_active_deals_within_extent (p_location float[] default null, p_radius int default null, p_extent float[] default null) returns setof active_deals_view as $$
 declare
-  v_point_min geometry(point, 4326);
-  v_point_max geometry(point, 4326);
-  v_extent geometry(polygon, 4326);
+    v_point_min geometry(point, 4326);
+    v_point_max geometry(point, 4326);
+    v_extent    geometry(polygon, 4326);
 begin
-  if p_location is not null and p_radius is not null then
-    v_extent := st_buffer(st_point(p_location[1], p_location[2])::geography, p_radius);
-  end if;
+    if p_location is not null and p_radius is not null then
+        v_extent := st_buffer(st_point(p_location[1], p_location[2])::geography, p_radius);
+    end if;
 
-  if p_extent is not null then
-    v_point_min := st_point(p_extent[1], p_extent[2])::geography;
-    v_point_max := st_point(p_extent[3], p_extent[4])::geography;
-    v_extent := st_envelope(st_makeline(v_point_min, v_point_max));
-  end if;
+    if p_extent is not null then
+        v_point_min := st_point(p_extent[1], p_extent[2])::geography;
+        v_point_max := st_point(p_extent[3], p_extent[4])::geography;
+        v_extent := st_envelope(st_makeline(v_point_min, v_point_max));
+    end if;
 
-  if v_extent is null then
-    raise warning 'Cannot create extent statement: neither location/radius nor extent is given';
-  end if;
+    if v_extent is null then
+        raise warning 'Cannot create extent statement: neither location/radius nor extent is given';
+    end if;
 
-  return query select * from active_deals_view d where st_within(d.location, v_extent);
+    return query select * from active_deals_view d where st_within(d.location, v_extent);
 end;
 $$ language plpgsql;
 
